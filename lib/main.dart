@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Container(
               margin: const EdgeInsets.only(bottom: 12),
               child: const Text(
-                'What\' Popular',
+                'What\'s Popular',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
             ),
@@ -99,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: Container(
                                 margin: const EdgeInsets.only(top: 10),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(12),
