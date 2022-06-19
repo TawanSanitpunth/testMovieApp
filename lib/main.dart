@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:my_app/constants.dart';
 import 'MovieDetails.dart';
 
 void main() {
@@ -36,11 +37,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _apiKey = "a678a709d309e5ebd4e6524290d9d310";
 
   Future<dynamic> getListMoive() async {
     final response = await http.get(Uri.parse(
-        "https://api.themoviedb.org/3/movie/popular?api_key=$_apiKey&language=en-US&page=1"));
+        "${api_url}popular?api_key=$api_key&language=en-US&page=1"));
     // print(response.body);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -49,11 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  @override
-  void initState() {
-    getListMoive();
-    super.initState();
-  }
+
 
   @override
   Widget build(BuildContext context) {

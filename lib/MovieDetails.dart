@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:my_app/constants.dart';
 
 class MovieDetails extends StatefulWidget {
   final String id;
@@ -13,13 +14,12 @@ class MovieDetails extends StatefulWidget {
 }
 
 class _MovieDetailsState extends State<MovieDetails> {
-  String _apiKey = "a678a709d309e5ebd4e6524290d9d310";
 
   Future<dynamic> getDetailMovie() async {
     final response = await http.get(Uri.parse(
-        "https://api.themoviedb.org/3/movie/" +
+        "$api_url" +
             widget.id +
-            "?api_key=$_apiKey&language=en-US"));
+            "?api_key=$api_key&language=en-US"));
     // print(response.body);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -28,11 +28,6 @@ class _MovieDetailsState extends State<MovieDetails> {
     }
   }
 
-  @override
-  void initState() {
-    getDetailMovie();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +46,7 @@ class _MovieDetailsState extends State<MovieDetails> {
           future: getDetailMovie(),
           builder: ((context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
+              final  image_url = 'https://image.tmdb.org/t/p/w500';
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -62,7 +58,7 @@ class _MovieDetailsState extends State<MovieDetails> {
                           colorFilter: new ColorFilter.mode(
                               Colors.black.withOpacity(0.7), BlendMode.darken),
                           image: NetworkImage(
-                            'https://image.tmdb.org/t/p/w500' +
+                            image_url +
                                 snapshot.data["backdrop_path"],
                           ),
                           fit: BoxFit.cover),
@@ -73,7 +69,7 @@ class _MovieDetailsState extends State<MovieDetails> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
-                              'https://image.tmdb.org/t/p/w500' +
+                             image_url +
                                   snapshot.data["poster_path"],
                               height: 250,
                               width: 200,
