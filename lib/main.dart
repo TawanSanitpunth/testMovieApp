@@ -1,9 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:my_app/constants.dart';
-import 'MovieDetails.dart';
+import 'package:my_app/controller/ListMovieController.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'view/MovieDetails.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,23 +36,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-  Future<dynamic> getListMoive() async {
-    final response = await http.get(Uri.parse(
-        "${api_url}popular?api_key=$api_key&language=en-US&page=1"));
-    // print(response.body);
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to load Data');
-    }
-  }
-
-
+  ListMovieController listMovieController = ListMovieController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: const Color(0xff040f0f),
       appBar: AppBar(
         title: Text(
           widget.title,
@@ -64,97 +52,106 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Container(
         padding: const EdgeInsets.all(12),
-        child: Column(
-          children: <Widget>[
-            Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: const Text(
-                'What\'s Popular',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-            ),
-            Expanded(
-              child: FutureBuilder<dynamic>(
-                  future: getListMoive(),
-                  builder: ((context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      return ListView.builder(
-                          itemCount: snapshot.data["results"].length,
-                          itemBuilder: ((context, index) {
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => MovieDetails(
-                                      id: snapshot.data["results"][index]["id"].toString(),
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.only(top: 10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Image.network(
-                                        'https://image.tmdb.org/t/p/w500' +
-                                            snapshot.data["results"][index]
-                                                ["poster_path"],
-                                        height: 150,
-                                        width: 100,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Text(
-                                      snapshot.data["results"][index]["title"],
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const SizedBox(
-                                      height: 5,
-                                    ),
-                                    Text(
-                                      snapshot.data["results"][index]
-                                          ["release_date"],
-                                      style: TextStyle(color: Colors.grey[600]),
-                                    )
-                                  ],
+        child: FutureBuilder<dynamic>(
+            future: listMovieController.getListMoive(),
+            builder: ((context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                var listMovie = listMovieController.listMovie.results;
+                return GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 200,
+                            crossAxisSpacing: 20,
+                            // mainAxisSpacing: 15,
+                            mainAxisExtent: 300),
+                    itemCount: listMovie.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MovieDetails(
+                                id: listMovie[index].id.toString(),
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(top: 10),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  pic_url + listMovie[index].posterPath,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                            );
-                          }));
-                    }
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  })),
-            ),
-
-            // Expanded(
-            //   child: ListView.builder(
-            //     itemCount: 2,
-            //     itemBuilder: (context, index) {
-            //       return Container(
-            //         child: ClipRRect(
-            //           borderRadius: BorderRadius.circular(20),
-            //           child: Image.network(
-            //             'https://image.tmdb.org/t/p/w500/gG9fTyDL03fiKnOpf2tr01sncnt.jpg',
-            //             height: 300,
-            //             width: 50,
-            //           ),
-            //         ),
-            //       );
-            //     },
-            //   ),
-            // )
-          ],
-        ),
+                              Positioned(
+                                bottom: 10,
+                                left: 12,
+                                child: CircularPercentIndicator(
+                                  radius: 20.0,
+                                  backgroundColor:
+                                      const Color(0xFF1F4529),
+                                  // fillColor: Colors.black,
+                                  lineWidth: 5.0,
+                                  percent: listMovie[index]
+                                          .voteAverage!
+                                          .toDouble() /
+                                      10,
+                                  center: Container(
+                                    width: 30,
+                                    height: 30,
+                                    decoration: const BoxDecoration(
+                                        color: Color(0xFF071C22),
+                                        shape: BoxShape.circle),
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "${listMovie[index].voteAverage!.toInt() * 10}",
+                                            style: const TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.white,
+                                                fontWeight:
+                                                    FontWeight.bold),
+                                          ),
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: const [
+                                              Text(
+                                                "%",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 8),
+                                              ),
+                                              SizedBox(
+                                                height: 6,
+                                              )
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  progressColor: const Color(0xFF23BD70),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+                    });
+              }
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            })),
       ),
     );
   }
