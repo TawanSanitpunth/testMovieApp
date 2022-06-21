@@ -43,7 +43,7 @@ class _MovieDetailsState extends State<MovieDetails> {
                         image: NetworkImage(
                           pic_url + movieDetail.backdropPath,
                         ),
-                        fit: BoxFit.cover),
+                        fit: BoxFit.fill),
                   ),
                   child: Column(
                     children: [
@@ -54,7 +54,7 @@ class _MovieDetailsState extends State<MovieDetails> {
                             pic_url + movieDetail.posterPath,
                             height: 250,
                             width: 200,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill,
                           ),
                         ),
                       ),
