@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/constants.dart';
-import 'package:my_app/controller/ListMovieController.dart';
+import 'package:my_app/presenter/ListMoviePresenter.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'view/MovieDetails.dart';
 
@@ -35,13 +35,27 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  ListMovieController listMovieController = ListMovieController();
+class _MyHomePageState extends State<MyHomePage>
+    implements ListMoviePresenterView {
+  ListMoviePresenter listMoviePresenter = ListMoviePresenter();
+  @override
+  nextPage(id) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MovieDetails(
+          id: id.toString(),
+        ),
+      ),
+    );
+  }
+
+ 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color(0xff040f0f),
+      backgroundColor: const Color(0xff040f0f),
       appBar: AppBar(
         title: Text(
           widget.title,
@@ -53,10 +67,10 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Container(
         padding: const EdgeInsets.all(12),
         child: FutureBuilder<dynamic>(
-            future: listMovieController.getListMoive(),
+            future: listMoviePresenter.getListMoive(),
             builder: ((context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
-                var listMovie = listMovieController.listMovie.results;
+                var listMovie = listMoviePresenter.listMovie.results;
                 return GridView.builder(
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -68,14 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemBuilder: (context, index) {
                       return GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MovieDetails(
-                                id: listMovie[index].id.toString(),
-                              ),
-                            ),
-                          );
+                          nextPage(listMovie[index].id);
                         },
                         child: Container(
                           margin: const EdgeInsets.only(top: 10),
@@ -93,14 +100,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                 left: 12,
                                 child: CircularPercentIndicator(
                                   radius: 20.0,
-                                  backgroundColor:
-                                      const Color(0xFF1F4529),
+                                  backgroundColor: const Color(0xFF1F4529),
                                   // fillColor: Colors.black,
                                   lineWidth: 5.0,
-                                  percent: listMovie[index]
-                                          .voteAverage!
-                                          .toDouble() /
-                                      10,
+                                  percent:
+                                      listMovie[index].voteAverage! /
+                                          10,
                                   center: Container(
                                     width: 30,
                                     height: 30,
@@ -117,8 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                             style: const TextStyle(
                                                 fontSize: 10,
                                                 color: Colors.white,
-                                                fontWeight:
-                                                    FontWeight.bold),
+                                                fontWeight: FontWeight.bold),
                                           ),
                                           Column(
                                             mainAxisAlignment:
@@ -154,5 +158,11 @@ class _MyHomePageState extends State<MyHomePage> {
             })),
       ),
     );
+  }
+  
+  @override
+  fetchMovies() {
+    // TODO: implement fetchMovies
+    throw UnimplementedError();
   }
 }

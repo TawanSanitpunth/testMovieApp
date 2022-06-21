@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/constants.dart';
-import 'package:my_app/controller/MovieDetailController.dart';
+import 'package:my_app/presenter/MovieDetailController.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class MovieDetails extends StatefulWidget {

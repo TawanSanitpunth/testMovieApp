@@ -4,8 +4,17 @@ import 'package:mvc_pattern/mvc_pattern.dart';
 import 'package:my_app/model/ListMovieModel.dart';
 import '../constants.dart';
 
-class ListMovieController extends ControllerMVC {
+abstract class ListMoviePresenterView {
+   nextPage(int id);
+   fetchMovies();
+}
+
+class ListMoviePresenter {
   late ListMovieModel listMovie;
+
+  // view.fetchMovies() {
+    
+  // }
 
   Future<ListMovieModel> getListMoive() async {
     final response = await http.get(
