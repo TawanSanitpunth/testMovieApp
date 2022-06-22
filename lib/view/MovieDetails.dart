@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/constants.dart';
-import 'package:my_app/presenter/MovieDetailController.dart';
+import 'package:my_app/presenter/MovieDetailPresenter.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class MovieDetails extends StatefulWidget {
@@ -12,7 +12,7 @@ class MovieDetails extends StatefulWidget {
 }
 
 class _MovieDetailsState extends State<MovieDetails> {
-  MovieDetailController movieDetailController = MovieDetailController();
+  MovieDetailPresenter movieDetailPresenter = MovieDetailPresenter();
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +29,10 @@ class _MovieDetailsState extends State<MovieDetails> {
       ),
       body: SingleChildScrollView(
         child: FutureBuilder<dynamic>(
-            future: movieDetailController.getDetailMovie(widget.id),
+            future: movieDetailPresenter.fetchMovieDetail(widget.id),
             builder: ((context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
-                var movieDetail = movieDetailController.movieDetail;
+                var movieDetail = movieDetailPresenter.movieDetail;
                 return Container(
                   padding: const EdgeInsets.all(15),
                   decoration: BoxDecoration(
@@ -43,7 +43,7 @@ class _MovieDetailsState extends State<MovieDetails> {
                         image: NetworkImage(
                           pic_url + movieDetail.backdropPath,
                         ),
-                        fit: BoxFit.cover),
+                        fit: BoxFit.fill),
                   ),
                   child: Column(
                     children: [
@@ -54,7 +54,7 @@ class _MovieDetailsState extends State<MovieDetails> {
                             pic_url + movieDetail.posterPath,
                             height: 250,
                             width: 200,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill,
                           ),
                         ),
                       ),
@@ -68,6 +68,17 @@ class _MovieDetailsState extends State<MovieDetails> {
                             color: Colors.white,
                             fontSize: 25,
                             fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        "Release Date: ${movieDetail.releaseDate}",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 15,
+                        ),
                       ),
                       const SizedBox(
                         height: 10,
@@ -143,38 +154,37 @@ class _MovieDetailsState extends State<MovieDetails> {
                                     fontWeight: FontWeight.w400),
                               ),
                             ],
+                          ),
+                          Container(
+                            margin: const EdgeInsets.all(5),
+                            padding: const EdgeInsets.all(5),
+                            decoration: const BoxDecoration(
+                                color: Colors.white, shape: BoxShape.circle),
+                            child: const Icon(
+                              Icons.favorite,
+                              color: Colors.pink,
+                            ),
                           )
                         ],
                       ),
                       const SizedBox(
                         height: 10,
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            movieDetail.releaseDate,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          Row(
-                            children: List.generate(
-                                movieDetail.genres.length,
-                                (i) => movieDetail.genres[i] == movieDetail.genres[0]
-                                    ? Text(
-                                        " ${movieDetail.genres[i].name}",
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                      )
-                                    : Text(
-                                        ", ${movieDetail.genres[i].name}",
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                      )),
-                          ),
-                        ],
+                      Wrap(
+                        children: List.generate(
+                            movieDetail.genres.length,
+                            (i) => movieDetail.genres[i] ==
+                                    movieDetail.genres[0]
+                                ? Text(
+                                    movieDetail.genres[i].name,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.grey[300]),
+                                  )
+                                : Text(
+                                    ", ${movieDetail.genres[i].name}",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.grey[300]),
+                                  )),
                       ),
                       const SizedBox(
                         height: 10,
@@ -192,15 +202,15 @@ class _MovieDetailsState extends State<MovieDetails> {
                       Row(
                         children: const [
                           Text('Overview',
-                              style: TextStyle(
-                                  fontSize: 18, color: Colors.white)),
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white)),
                         ],
                       ),
                       const SizedBox(
                         height: 5,
                       ),
                       Text(
-                       movieDetail.overview,
+                        movieDetail.overview,
                         style: const TextStyle(color: Colors.white),
                       )
                     ],

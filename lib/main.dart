@@ -37,7 +37,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     implements ListMoviePresenterView {
-  ListMoviePresenter listMoviePresenter = ListMoviePresenter();
+  late ListMoviePresenter listMoviePresenter;
+
+  _MyHomePageState() {
+    listMoviePresenter = ListMoviePresenter(this);
+  }
+
   @override
   nextPage(id) {
     Navigator.push(
@@ -50,7 +55,10 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
- 
+  @override
+  fetchMovies() {
+    listMoviePresenter.fetchMovies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage>
       body: Container(
         padding: const EdgeInsets.all(12),
         child: FutureBuilder<dynamic>(
-            future: listMoviePresenter.getListMoive(),
+            future: listMoviePresenter.fetchMovies(),
             builder: ((context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 var listMovie = listMoviePresenter.listMovie.results;
@@ -103,9 +111,7 @@ class _MyHomePageState extends State<MyHomePage>
                                   backgroundColor: const Color(0xFF1F4529),
                                   // fillColor: Colors.black,
                                   lineWidth: 5.0,
-                                  percent:
-                                      listMovie[index].voteAverage! /
-                                          10,
+                                  percent: listMovie[index].voteAverage! / 10,
                                   center: Container(
                                     width: 30,
                                     height: 30,
@@ -158,11 +164,5 @@ class _MyHomePageState extends State<MyHomePage>
             })),
       ),
     );
-  }
-  
-  @override
-  fetchMovies() {
-    // TODO: implement fetchMovies
-    throw UnimplementedError();
   }
 }
