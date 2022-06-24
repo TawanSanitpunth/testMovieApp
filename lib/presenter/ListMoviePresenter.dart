@@ -2,8 +2,7 @@ import 'package:my_app/model/ListMovieModel.dart';
 import 'package:my_app/repository/repository.dart';
 
 abstract class ListMoviePresenterView {
-  nextPage(int id);
-  fetchMovies();
+
 }
 
 class ListMoviePresenter {
@@ -20,8 +19,4 @@ class ListMoviePresenter {
     return listMovie;
   }
 
-
-  nextPage(int id) {
-    // view.nextPage(id);
-  }
 }

@@ -11,8 +11,23 @@ class MovieDetails extends StatefulWidget {
   State<MovieDetails> createState() => _MovieDetailsState();
 }
 
-class _MovieDetailsState extends State<MovieDetails> {
-  MovieDetailPresenter movieDetailPresenter = MovieDetailPresenter();
+class _MovieDetailsState extends State<MovieDetails>
+    implements MovieDetailView {
+  late MovieDetailPresenter movieDetailPresenter;
+
+  _MovieDetailsState() {
+    movieDetailPresenter = MovieDetailPresenter(this);
+  }
+  bool _isfav = false;
+
+  @override
+  onClickFav(bool isfav) {
+    setState(() {
+      _isfav = !_isfav;
+    });
+    isfav = _isfav;
+    // print(_isfav);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,15 +170,22 @@ class _MovieDetailsState extends State<MovieDetails> {
                               ),
                             ],
                           ),
+                          const SizedBox(
+                            width: 10,
+                          ),
                           Container(
                             margin: const EdgeInsets.all(5),
-                            padding: const EdgeInsets.all(5),
+                            // padding: const EdgeInsets.all(2),
                             decoration: const BoxDecoration(
-                                color: Colors.white, shape: BoxShape.circle),
-                            child: const Icon(
-                              Icons.favorite,
-                              color: Colors.pink,
-                            ),
+                                color: Color(0xff022541),
+                                shape: BoxShape.circle),
+                            child: IconButton(
+                                onPressed: () =>
+                                    movieDetailPresenter.onClick(!_isfav),
+                                icon: Icon(Icons.favorite,
+                                    color: _isfav != true
+                                        ? Colors.white
+                                        : Colors.pink)),
                           )
                         ],
                       ),

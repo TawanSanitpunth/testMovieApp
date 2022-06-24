@@ -1,10 +1,15 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:my_app/constants.dart';
-import 'package:my_app/presenter/ListMoviePresenter.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'view/MovieDetails.dart';
+import 'package:flutter/rendering.dart';
+import 'package:my_app/view/ListMovies.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:my_app/view/Register.dart';
+import 'package:my_app/view/forgetPassword.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -35,35 +40,55 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
-    implements ListMoviePresenterView {
-  late ListMoviePresenter listMoviePresenter;
+class _MyHomePageState extends State<MyHomePage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  _MyHomePageState() {
-    listMoviePresenter = ListMoviePresenter(this);
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  @override
+  void initState() {
+    // checkAuth();
+    super.initState();
   }
 
-  @override
-  nextPage(id) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MovieDetails(
-          id: id.toString(),
+  signIn() {
+    _auth
+        .signInWithEmailAndPassword(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    )
+        .then((user) {
+      print(user.user?.email);
+      print(_auth.currentUser);
+      checkAuth();
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text(error.message),
         ),
-      ),
-    );
+      );
+      print('Email is ${emailController} Password is ${passwordController}');
+      print(error.message);
+    });
   }
 
-  @override
-  fetchMovies() {
-    listMoviePresenter.fetchMovies();
+  checkAuth() {
+    if (_auth.currentUser != null) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ListMovies(
+                    title: widget.title,
+                    emailUser: _auth.currentUser?.email,
+                  )),
+          (route) => false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xff040f0f),
       appBar: AppBar(
         title: Text(
           widget.title,
@@ -72,96 +97,150 @@ class _MyHomePageState extends State<MyHomePage>
         ),
         backgroundColor: const Color(0xff022541),
       ),
-      body: Container(
-        padding: const EdgeInsets.all(12),
-        child: FutureBuilder<dynamic>(
-            future: listMoviePresenter.fetchMovies(),
-            builder: ((context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                var listMovie = listMoviePresenter.listMovie.results;
-                return GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 200,
-                            crossAxisSpacing: 20,
-                            // mainAxisSpacing: 15,
-                            mainAxisExtent: 300),
-                    itemCount: listMovie.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          nextPage(listMovie[index].id);
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(top: 10),
-                          child: Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  pic_url + listMovie[index].posterPath,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 10,
-                                left: 12,
-                                child: CircularPercentIndicator(
-                                  radius: 20.0,
-                                  backgroundColor: const Color(0xFF1F4529),
-                                  // fillColor: Colors.black,
-                                  lineWidth: 5.0,
-                                  percent: listMovie[index].voteAverage! / 10,
-                                  center: Container(
-                                    width: 30,
-                                    height: 30,
-                                    decoration: const BoxDecoration(
-                                        color: Color(0xFF071C22),
-                                        shape: BoxShape.circle),
-                                    child: Center(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "${listMovie[index].voteAverage!.toInt() * 10}",
-                                            style: const TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: const [
-                                              Text(
-                                                "%",
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 8),
-                                              ),
-                                              SizedBox(
-                                                height: 6,
-                                              )
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  progressColor: const Color(0xFF23BD70),
-                                ),
-                              )
-                            ],
-                          ),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+          TextEditingController().clear();
+        },
+        child: Container(
+          color: const Color(0xff040f0f),
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(30, 12, 30, 12),
+              decoration: BoxDecoration(
+                color: const Color(0xff1B1B1B),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.5),
+                    spreadRadius: 5,
+                    blurRadius: 7,
+                    offset: const Offset(0, 3), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Log in',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextField(
+                      controller: emailController,
+                      decoration:
+                          const InputDecoration.collapsed(hintText: 'Email'),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextField(
+                      obscureText: true,
+                      controller: passwordController,
+                      decoration:
+                          const InputDecoration.collapsed(hintText: 'Password'),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  InkWell(
+                    onTap: () => signIn(),
+                    child: Container(
+                      width: double.maxFinite,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6),
+                        color: Colors.teal[900],
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: const Center(
+                        child: Text(
+                          'Login',
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
                         ),
-                      );
-                    });
-              }
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            })),
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) =>
+                                ForgetPassword(title: widget.title))),
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: const [
+                          Text(
+                            'Forget password?',
+                            style: TextStyle(
+                                color: Colors.white,
+                                decoration: TextDecoration.underline),
+                            textAlign: TextAlign.right,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Divider(
+                    color: Colors.black,
+                    thickness: 1,
+                    height: 50,
+                  ),
+                  const Center(
+                    child: Text(
+                      'New One?',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  InkWell(
+                    onTap: () => Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) =>
+                                Register(title: widget.title))),
+                    child: const Center(
+                      child: Text(
+                        'Sign up',
+                        style: TextStyle(
+                          decoration: TextDecoration.underline,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
