@@ -1,7 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:my_app/model/LogInModel.dart';
+import 'package:my_app/presenter/LogInPresenter.dart';
 import 'package:my_app/view/ListMovies.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:my_app/view/Register.dart';
@@ -40,49 +41,55 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> implements LogInView {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  LogInModel logInModel = LogInModel();
+  final _formKey = GlobalKey<FormState>();
+  late LogInPresenter logInPresenter;
 
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  _MyHomePageState() {
+    logInPresenter = LogInPresenter(this);
+  }
+
   @override
   void initState() {
-    // checkAuth();
+    checkAuth();
     super.initState();
   }
 
-  signIn() {
-    _auth
-        .signInWithEmailAndPassword(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),
-    )
-        .then((user) {
-      print(user.user?.email);
-      print(_auth.currentUser);
-      checkAuth();
-    }).catchError((error) {
+  @override
+  checkAuth() {
+    if (_auth.currentUser != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ListMovies(
+                      title: widget.title,
+                      emailUser: _auth.currentUser?.email,
+                    )),
+            (route) => false);
+      });
+    }
+  }
+
+  @override
+  loginError(errorCode) {
+    if (logInModel.emailController.text.trim().isEmpty ||
+        logInModel.passwordController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          content: Text("Please fill Email and password"),
+        ),
+      );
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.red,
-          content: Text(error.message),
+          content: Text(errorCode),
         ),
       );
-      print('Email is ${emailController} Password is ${passwordController}');
-      print(error.message);
-    });
-  }
-
-  checkAuth() {
-    if (_auth.currentUser != null) {
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ListMovies(
-                    title: widget.title,
-                    emailUser: _auth.currentUser?.email,
-                  )),
-          (route) => false);
     }
   }
 
@@ -119,124 +126,131 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Log in',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Log in',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20),
                     ),
-                    child: TextField(
-                      controller: emailController,
-                      decoration:
-                          const InputDecoration.collapsed(hintText: 'Email'),
+                    const SizedBox(
+                      height: 30,
                     ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextField(
-                      obscureText: true,
-                      controller: passwordController,
-                      decoration:
-                          const InputDecoration.collapsed(hintText: 'Password'),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  InkWell(
-                    onTap: () => signIn(),
-                    child: Container(
-                      width: double.maxFinite,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        color: Colors.teal[900],
-                      ),
+                    Container(
                       padding: const EdgeInsets.all(10),
-                      child: const Center(
-                        child: Text(
-                          'Login',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: TextField(
+                        controller: logInModel.emailController,
+                        decoration:
+                            const InputDecoration.collapsed(hintText: 'Email'),
                       ),
                     ),
-                  ),
-                  InkWell(
-                    onTap: () => Navigator.push(
-                        context,
-                        CupertinoPageRoute(
-                            builder: (context) =>
-                                ForgetPassword(title: widget.title))),
-                    child: Container(
-                      margin: const EdgeInsets.only(top: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: const [
-                          Text(
-                            'Forget password?',
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: TextField(
+                        obscureText: true,
+                        controller: logInModel.passwordController,
+                        decoration: const InputDecoration.collapsed(
+                            hintText: 'Password'),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    InkWell(
+                      onTap: () => logInPresenter.onClickLogin(
+                          _auth,
+                          logInModel.emailController,
+                          logInModel.passwordController),
+                      child: Container(
+                        width: double.maxFinite,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(6),
+                          color: Colors.teal[900],
+                        ),
+                        padding: const EdgeInsets.all(10),
+                        child: const Center(
+                          child: Text(
+                            'Login',
                             style: TextStyle(
                                 color: Colors.white,
-                                decoration: TextDecoration.underline),
-                            textAlign: TextAlign.right,
+                                fontWeight: FontWeight.bold),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const Divider(
-                    color: Colors.black,
-                    thickness: 1,
-                    height: 50,
-                  ),
-                  const Center(
-                    child: Text(
-                      'New One?',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  InkWell(
-                    onTap: () => Navigator.push(
-                        context,
-                        CupertinoPageRoute(
-                            builder: (context) =>
-                                Register(title: widget.title))),
-                    child: const Center(
-                      child: Text(
-                        'Sign up',
-                        style: TextStyle(
-                          decoration: TextDecoration.underline,
-                          color: Colors.white,
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    InkWell(
+                      onTap: () => Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                              builder: (context) =>
+                                  ForgetPassword(title: widget.title))),
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: const [
+                            Text(
+                              'Forget password?',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  decoration: TextDecoration.underline),
+                              textAlign: TextAlign.right,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Divider(
+                      color: Colors.black,
+                      thickness: 1,
+                      height: 50,
+                    ),
+                    const Center(
+                      child: Text(
+                        'New One?',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    InkWell(
+                      onTap: () => Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                              builder: (context) =>
+                                  Register(title: widget.title))),
+                      child: const Center(
+                        child: Text(
+                          'Sign up',
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

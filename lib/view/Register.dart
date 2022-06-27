@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:my_app/model/RegisterModel.dart';
+import 'package:my_app/presenter/RegisterPresenter.dart';
 
 import '../main.dart';
 
@@ -13,55 +13,47 @@ class Register extends StatefulWidget {
   State<Register> createState() => _RegisterState();
 }
 
-class _RegisterState extends State<Register> {
+class _RegisterState extends State<Register> implements RegisterView {
+  late RegisterPresenter registerPresenter;
+  _RegisterState() {
+    registerPresenter = RegisterPresenter(this);
+  }
   FirebaseAuth _auth = FirebaseAuth.instance;
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController cfPasswordController = TextEditingController();
-  late String email = emailController.text.trim();
-  late String password = passwordController.text.trim();
-  late String cfPassword = cfPasswordController.text.trim();
-  bool isFormatEmail = false;
-  bool pwLengt = false;
-  bool isUppercase = false;
-  bool isLowercase = false;
-  bool isSpecial = false;
-  bool isNum = false;
+  RegisterModel registerModel = RegisterModel();
 
-  RegExp regExpEmail = RegExp(
-      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+  @override
+  passwordNotMatch() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: Colors.redAccent,
+        content: Text("Password and Confirm password not match"),
+      ),
+    );
+  }
 
-  RegExp regExpPassword =
-      RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
-  signUp() {
-    if (password == cfPassword) {
-      _auth
-          .createUserWithEmailAndPassword(email: email, password: password)
-          .then((user) => {
-                print(user),
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    backgroundColor: Colors.greenAccent,
-                    content: Text("Register Success"),
-                  ),
-                ),
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => MyHomePage(title: widget.title)),
-                    (route) => false)
-              })
-          .catchError((error) {
-        print(error);
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.redAccent,
-          content: Text("Password and Confirm password not match"),
-        ),
-      );
-    }
+  @override
+  registerSuccess() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: Colors.greenAccent,
+        content: Text("Register Success"),
+      ),
+    );
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => MyHomePage(title: widget.title)),
+        (route) => false);
+  }
+
+  @override
+  registerError(errorCode) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.redAccent,
+        content: Text(errorCode),
+      ),
+    );
   }
 
   @override
@@ -123,14 +115,14 @@ class _RegisterState extends State<Register> {
                       child: TextField(
                         onChanged: (value) {
                           setState(() {
-                            if (regExpEmail.hasMatch(value)) {
-                              isFormatEmail = true;
+                            if (registerModel.regExpEmail.hasMatch(value)) {
+                              registerModel.isFormatEmail = true;
                             } else {
-                              isFormatEmail = false;
+                              registerModel.isFormatEmail = false;
                             }
                           });
                         },
-                        controller: emailController,
+                        controller: registerModel.emailController,
                         decoration:
                             const InputDecoration.collapsed(hintText: 'Email'),
                       ),
@@ -146,42 +138,42 @@ class _RegisterState extends State<Register> {
                       ),
                       child: TextField(
                         obscureText: true,
-                        controller: passwordController,
+                        controller: registerModel.passwordController,
                         onChanged: (value) {
                           setState(() {
-                            //check length
+                            // check length
                             if (value.length >= 8) {
-                              pwLengt = true;
+                              registerModel.pwLengt = true;
                             } else {
-                              pwLengt = false;
+                              registerModel.pwLengt = false;
                             }
 
                             //check uppercase
                             if (RegExp('(?=.*[A-Z])').hasMatch(value)) {
-                              isUppercase = true;
+                              registerModel.isUppercase = true;
                             } else {
-                              isUppercase = false;
+                              registerModel.isUppercase = false;
                             }
 
                             //check lowercase
                             if (RegExp('(?=.*[a-z])').hasMatch(value)) {
-                              isLowercase = true;
+                              registerModel.isLowercase = true;
                             } else {
-                              isLowercase = false;
+                              registerModel.isLowercase = false;
                             }
 
                             //check special characters
                             if (RegExp('(?=.*?[!@#\$&*~])').hasMatch(value)) {
-                              isSpecial = true;
+                              registerModel.isSpecial = true;
                             } else {
-                              isSpecial = false;
+                              registerModel.isSpecial = false;
                             }
 
                             //check num
                             if (RegExp('(?=.*?[0-9])').hasMatch(value)) {
-                              isNum = true;
+                              registerModel.isNum = true;
                             } else {
-                              isNum = false;
+                              registerModel.isNum = false;
                             }
                           });
                         },
@@ -200,7 +192,7 @@ class _RegisterState extends State<Register> {
                       ),
                       child: TextField(
                         obscureText: true,
-                        controller: cfPasswordController,
+                        controller: registerModel.cfPasswordController,
                         decoration: const InputDecoration.collapsed(
                             hintText: 'Confirm password'),
                       ),
@@ -208,7 +200,7 @@ class _RegisterState extends State<Register> {
                     const SizedBox(
                       height: 15,
                     ),
-                    passwordController.text.trim() != ""
+                    registerModel.passwordController.text.trim() != ""
                         ? Container(
                             child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,27 +211,36 @@ class _RegisterState extends State<Register> {
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold),
                               ),
-                              checkPassword(pwLengt, "Atlease 8 characters"),
-                              checkPassword(isUppercase, "Atlease 1 Uppercase"),
-                              checkPassword(isLowercase, "Atlease 1 Lowercase"),
+                              checkPassword(registerModel.pwLengt,
+                                  "Atlease 8 characters"),
+                              checkPassword(registerModel.isUppercase,
+                                  "Atlease 1 Uppercase"),
+                              checkPassword(registerModel.isLowercase,
+                                  "Atlease 1 Lowercase"),
+                              checkPassword(registerModel.isSpecial,
+                                  "Atlease 1 Special characters"),
                               checkPassword(
-                                  isSpecial, "Atlease 1 Special characters"),
-                              checkPassword(isNum, "Atlease 1 Number")
+                                  registerModel.isNum, "Atlease 1 Number")
                             ],
                           ))
                         : Container(),
                     const SizedBox(
                       height: 30,
                     ),
-                    isFormatEmail &&
-                            pwLengt &&
-                            isUppercase &&
-                            isLowercase &&
-                            isSpecial &&
-                            isNum == true
+                    registerModel.isFormatEmail &&
+                            registerModel.pwLengt &&
+                            registerModel.isUppercase &&
+                            registerModel.isLowercase &&
+                            registerModel.isSpecial &&
+                            registerModel.isNum == true
                         ? InkWell(
                             onTap: () {
-                              signUp();
+                              // signUp();
+                              registerPresenter.onclickSignUp(
+                                  _auth,
+                                  registerModel.email,
+                                  registerModel.password,
+                                  registerModel.cfPassword);
                             },
                             child: Container(
                               width: double.maxFinite,

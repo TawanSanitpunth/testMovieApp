@@ -1,7 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:my_app/constants.dart';
 import 'package:my_app/presenter/ListMoviePresenter.dart';
 import 'package:my_app/view/MovieDetails.dart';
@@ -22,14 +20,54 @@ class ListMovies extends StatefulWidget {
 class _ListMoviesState extends State<ListMovies>
     implements ListMoviePresenterView {
   late ListMoviePresenter listMoviePresenter;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   _ListMoviesState() {
     listMoviePresenter = ListMoviePresenter(this);
   }
 
-  FirebaseAuth _auth = FirebaseAuth.instance;
-  signOut() {
-    _auth.signOut();
+  @override
+  alertDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Color(0xff022541),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            title: const Text('Log out'),
+            titleTextStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF7ccaab),
+                fontSize: 20),
+            content: const Text('You will be returned to the login screen'),
+            contentTextStyle: const TextStyle(
+              color: Color(0xFF7ccaab),
+            ),
+            actions: [
+              TextButton(
+                onPressed: (() => Navigator.pop(context)),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                      color: Colors.redAccent, fontWeight: FontWeight.bold),
+                ),
+              ),
+              TextButton(
+                onPressed: (() => listMoviePresenter.signOut(_auth)),
+                child: const Text(
+                  'Logout',
+                  style: TextStyle(
+                      color: Color(0xFF7ccaab), fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          );
+        });
+  }
+
+  @override
+  backToLogIn() {
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -45,9 +83,8 @@ class _ListMoviesState extends State<ListMovies>
         automaticallyImplyLeading: false,
         actions: [
           Container(
-            padding: EdgeInsets.only(right: 10),
+            padding: const EdgeInsets.only(right: 10),
             width: 150,
-            // color: Colors.red,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -55,7 +92,7 @@ class _ListMoviesState extends State<ListMovies>
                   child: Text(
                     '${widget.emailUser}',
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Color(0xFF7ccaab),
                     ),
                   ),
@@ -66,7 +103,7 @@ class _ListMoviesState extends State<ListMovies>
           Padding(
             padding: const EdgeInsets.only(right: 10),
             child: InkWell(
-                onTap: () => signOut(),
+                onTap: () => listMoviePresenter.onClickLogOut(),
                 child: Icon(
                   Icons.exit_to_app,
                   color: Colors.grey[300],
@@ -92,7 +129,6 @@ class _ListMoviesState extends State<ListMovies>
                         const SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: 200,
                             crossAxisSpacing: 20,
-                            // mainAxisSpacing: 15,
                             mainAxisExtent: 300),
                     itemCount: listMovie.length,
                     itemBuilder: (context, index) {

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:my_app/main.dart';
+import 'package:my_app/model/ForgetPasswordModel.dart';
+import 'package:my_app/presenter/ForgetPasswordPresenter.dart';
 
 class ForgetPassword extends StatefulWidget {
   const ForgetPassword({Key? key, required this.title}) : super(key: key);
@@ -13,25 +15,41 @@ class ForgetPassword extends StatefulWidget {
   State<ForgetPassword> createState() => _ForgetPasswordState();
 }
 
-class _ForgetPasswordState extends State<ForgetPassword> {
+class _ForgetPasswordState extends State<ForgetPassword>
+    implements ForgetPasswordView {
+  late ForgetPasswordPresenter forgetPasswordPresenter;
+  ForgetPasswordModel forgetPasswordModel = ForgetPasswordModel();
   FirebaseAuth _auth = FirebaseAuth.instance;
-  TextEditingController emailController = TextEditingController();
-  late String email = emailController.text.trim();
-  resetPassword() {
-    _auth.sendPasswordResetEmail(email: email);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.greenAccent,
-        content: Text("We send the detail to $email successfully."),
-      ),
-    );
-    Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-            builder: (context) => MyHomePage(
-                  title: widget.title,
-                )),
-        (route) => false);
+
+  _ForgetPasswordState() {
+    forgetPasswordPresenter = ForgetPasswordPresenter(this);
+  }
+
+  @override
+  sendEmailSuccess() {
+    if (forgetPasswordModel.emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.redAccent,
+          content: Text("Please fill your email"),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.greenAccent,
+          content: Text(
+              "We send the detail to ${forgetPasswordModel.email} successfully."),
+        ),
+      );
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MyHomePage(
+                    title: widget.title,
+                  )),
+          (route) => false);
+    }
   }
 
   @override
@@ -84,7 +102,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: TextField(
-                    controller: emailController,
+                    controller: forgetPasswordModel.emailController,
                     decoration:
                         const InputDecoration.collapsed(hintText: 'Email'),
                   ),
@@ -96,7 +114,8 @@ class _ForgetPasswordState extends State<ForgetPassword> {
                   height: 30,
                 ),
                 InkWell(
-                  onTap: () => resetPassword(),
+                  onTap: () => forgetPasswordPresenter.onClickResetPassword(
+                      _auth, forgetPasswordModel.email),
                   child: Container(
                     width: double.maxFinite,
                     decoration: BoxDecoration(
