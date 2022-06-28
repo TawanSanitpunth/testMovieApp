@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/model/RegisterModel.dart';
 import 'package:my_app/presenter/RegisterPresenter.dart';
+import 'package:my_app/view/LoginPage.dart';
 
 import '../main.dart';
 
@@ -42,7 +43,7 @@ class _RegisterState extends State<Register> implements RegisterView {
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (context) => MyHomePage(title: widget.title)),
+            builder: (context) => LoginPage(title: widget.title)),
         (route) => false);
   }
 

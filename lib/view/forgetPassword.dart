@@ -6,6 +6,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:my_app/main.dart';
 import 'package:my_app/model/ForgetPasswordModel.dart';
 import 'package:my_app/presenter/ForgetPasswordPresenter.dart';
+import 'package:my_app/view/LoginPage.dart';
 
 class ForgetPassword extends StatefulWidget {
   const ForgetPassword({Key? key, required this.title}) : super(key: key);
@@ -45,7 +46,7 @@ class _ForgetPasswordState extends State<ForgetPassword>
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-              builder: (context) => MyHomePage(
+              builder: (context) => LoginPage(
                     title: widget.title,
                   )),
           (route) => false);

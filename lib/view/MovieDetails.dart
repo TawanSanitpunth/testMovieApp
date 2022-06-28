@@ -26,7 +26,6 @@ class _MovieDetailsState extends State<MovieDetails>
       _isfav = !_isfav;
     });
     isfav = _isfav;
-    // print(_isfav);
   }
 
   @override

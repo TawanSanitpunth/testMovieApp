@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/constants.dart';
 import 'package:my_app/presenter/ListMoviePresenter.dart';
+import 'package:my_app/view/LoginPage.dart';
 import 'package:my_app/view/MovieDetails.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
@@ -71,7 +72,7 @@ class _ListMoviesState extends State<ListMovies>
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (context) => MyHomePage(title: widget.title)),
+            builder: (context) => LoginPage(title: widget.title)),
         (route) => false);
   }
 
