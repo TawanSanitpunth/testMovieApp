@@ -4,6 +4,7 @@ import 'package:my_app/constants.dart';
 import 'package:my_app/presenter/ListMoviePresenter.dart';
 import 'package:my_app/view/LoginPage.dart';
 import 'package:my_app/view/MovieDetails.dart';
+import 'package:my_app/view/MyFavorite.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../main.dart';
@@ -26,14 +27,13 @@ class _ListMoviesState extends State<ListMovies>
   _ListMoviesState() {
     listMoviePresenter = ListMoviePresenter(this);
   }
-
   @override
   alertDialog() {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            backgroundColor: Color(0xff022541),
+            backgroundColor: const Color(0xff022541),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             title: const Text('Log out'),
@@ -71,8 +71,7 @@ class _ListMoviesState extends State<ListMovies>
   backToLogIn() {
     Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(
-            builder: (context) => LoginPage(title: widget.title)),
+        MaterialPageRoute(builder: (context) => LoginPage(title: widget.title)),
         (route) => false);
   }
 
@@ -80,44 +79,6 @@ class _ListMoviesState extends State<ListMovies>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xff040f0f),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        actions: [
-          Container(
-            padding: const EdgeInsets.only(right: 10),
-            width: 150,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Flexible(
-                  child: Text(
-                    '${widget.emailUser}',
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Color(0xFF7ccaab),
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: InkWell(
-                onTap: () => listMoviePresenter.onClickLogOut(),
-                child: Icon(
-                  Icons.exit_to_app,
-                  color: Colors.grey[300],
-                )),
-          )
-        ],
-        title: Text(
-          widget.title,
-          style: const TextStyle(
-              color: Color(0xFF7ccaab), fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: const Color(0xff022541),
-      ),
       body: Container(
         padding: const EdgeInsets.all(12),
         child: FutureBuilder<dynamic>(
