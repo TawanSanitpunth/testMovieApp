@@ -31,31 +31,29 @@ class _MyFavoriteState extends State<MyFavorite> implements MyFavoriteView {
               future: myFavoritePresenter.fetchMovies(widget.emailUser ?? ""),
               builder: ((context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  return 
-                  // myFavoritePresenter.movieLength.isEmpty
-                  //     ? Center(
-                  //         child: Row(children: <Widget>[
-                  //         Expanded(
-                  //             child: Divider(
-                  //           color: Colors.grey.withOpacity(0.2),
-                  //           thickness: 1.5,
-                  //           indent: 10,
-                  //           endIndent: 10,
-                  //         )),
-                  //         const Text(
-                  //           'No favorite Movies.',
-                  //           style: TextStyle(color: Color(0xFF7ccaab)),
-                  //         ),
-                  //         Expanded(
-                  //             child: Divider(
-                  //           color: Colors.grey.withOpacity(0.2),
-                  //           thickness: 1.5,
-                  //           indent: 10,
-                  //           endIndent: 10,
-                  //         )),
-                  //       ]))
-                  //     : 
-                      GridView.builder(
+                  return myFavoritePresenter.movieLength.isEmpty
+                      ? Center(
+                          child: Row(children: <Widget>[
+                          Expanded(
+                              child: Divider(
+                            color: Colors.grey.withOpacity(0.2),
+                            thickness: 1.5,
+                            indent: 10,
+                            endIndent: 10,
+                          )),
+                          const Text(
+                            'No favorite Movies.',
+                            style: TextStyle(color: Color(0xFF7ccaab)),
+                          ),
+                          Expanded(
+                              child: Divider(
+                            color: Colors.grey.withOpacity(0.2),
+                            thickness: 1.5,
+                            indent: 10,
+                            endIndent: 10,
+                          )),
+                        ]))
+                      : GridView.builder(
                           gridDelegate:
                               const SliverGridDelegateWithMaxCrossAxisExtent(
                                   maxCrossAxisExtent: 200,
