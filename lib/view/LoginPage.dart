@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:my_app/presenter/LogInPresenter.dart';
 import 'package:my_app/view/ListMovies.dart';
+import 'package:my_app/view/PageScreen.dart';
 import 'package:my_app/view/Register.dart';
 import 'package:my_app/view/forgetPassword.dart';
 
@@ -40,7 +41,7 @@ class _LoginPageState extends State<LoginPage> implements LogInView {
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-                builder: (context) => ListMovies(
+                builder: (context) => PageScreen(
                       title: widget.title,
                       emailUser: _auth.currentUser?.email,
                     )),

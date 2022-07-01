@@ -1,15 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:my_app/presenter/ListMoviePresenter.dart';
+import 'package:my_app/presenter/screenPagePresenter.dart';
 import 'package:my_app/view/ListMovies.dart';
 import 'package:my_app/view/LoginPage.dart';
-import 'package:my_app/view/MovieDetails.dart';
 import 'package:my_app/view/MyFavorite.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
-
-import '../constants.dart';
 
 class PageScreen extends StatefulWidget {
   final String title;
@@ -21,11 +15,10 @@ class PageScreen extends StatefulWidget {
   State<PageScreen> createState() => _PageScreenState();
 }
 
-class _PageScreenState extends State<PageScreen>
-    implements ListMoviePresenterView {
-  late ListMoviePresenter listMoviePresenter;
+class _PageScreenState extends State<PageScreen> implements PageScreenView {
+  late PageScreenPresenter pageScreenPresenter;
   _PageScreenState() {
-    listMoviePresenter = ListMoviePresenter(this);
+    pageScreenPresenter = PageScreenPresenter(this);
   }
   FirebaseAuth _auth = FirebaseAuth.instance;
   PageController pageController = PageController();
@@ -59,7 +52,7 @@ class _PageScreenState extends State<PageScreen>
                 ),
               ),
               TextButton(
-                onPressed: (() => listMoviePresenter.signOut(_auth)),
+                onPressed: (() => pageScreenPresenter.signOut(_auth)),
                 child: const Text(
                   'Logout',
                   style: TextStyle(
@@ -114,7 +107,7 @@ class _PageScreenState extends State<PageScreen>
           Padding(
             padding: const EdgeInsets.only(right: 10),
             child: InkWell(
-                onTap: () => listMoviePresenter.onClickLogOut(),
+                onTap: () => pageScreenPresenter.onClickLogOut(),
                 child: Icon(
                   Icons.exit_to_app,
                   color: Colors.grey[300],
@@ -132,7 +125,9 @@ class _PageScreenState extends State<PageScreen>
         controller: pageController,
         children: [
           ListMovies(title: widget.title, emailUser: widget.emailUser),
-          const MyFavorite()
+          MyFavorite(
+            emailUser: widget.emailUser,
+          )
         ],
       ),
       bottomNavigationBar: ClipRRect(
