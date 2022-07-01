@@ -202,28 +202,27 @@ class _RegisterState extends State<Register> implements RegisterView {
                       height: 15,
                     ),
                     registerModel.passwordController.text.trim() != ""
-                        ? Container(
-                            child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              const Text(
-                                'Password must contain : ',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              checkPassword(registerModel.pwLengt,
-                                  "Atlease 8 characters"),
-                              checkPassword(registerModel.isUppercase,
-                                  "Atlease 1 Uppercase"),
-                              checkPassword(registerModel.isLowercase,
-                                  "Atlease 1 Lowercase"),
-                              checkPassword(registerModel.isSpecial,
-                                  "Atlease 1 Special characters"),
-                              checkPassword(
-                                  registerModel.isNum, "Atlease 1 Number")
-                            ],
-                          ))
+                        ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const Text(
+                            'Password must contain : ',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          checkPassword(registerModel.pwLengt,
+                              "Atlease 8 characters"),
+                          checkPassword(registerModel.isUppercase,
+                              "Atlease 1 Uppercase"),
+                          checkPassword(registerModel.isLowercase,
+                              "Atlease 1 Lowercase"),
+                          checkPassword(registerModel.isSpecial,
+                              "Atlease 1 Special characters"),
+                          checkPassword(
+                              registerModel.isNum, "Atlease 1 Number")
+                        ],
+                          )
                         : Container(),
                     const SizedBox(
                       height: 30,
@@ -318,7 +317,7 @@ class _RegisterState extends State<Register> implements RegisterView {
     );
   }
 
-  Container checkPassword(bool passwordFormat, String TextFormat) {
+  Container checkPassword(bool passwordFormat, String textFormat) {
     return Container(
       margin: const EdgeInsets.only(top: 10),
       child: Row(
@@ -331,7 +330,7 @@ class _RegisterState extends State<Register> implements RegisterView {
             width: 15,
           ),
           Text(
-            TextFormat,
+            textFormat,
             style: TextStyle(
                 color: passwordFormat == true ? Colors.green[300] : Colors.red),
           )

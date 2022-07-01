@@ -2,10 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:my_app/constants.dart';
 import 'package:my_app/presenter/MovieDetailPresenter.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MovieDetails extends StatefulWidget {
   final String id;
-  const MovieDetails({Key? key, required this.id}) : super(key: key);
+  final String emailUser;
+  final String movieTitle;
+  final String posterPath;
+  final num voteAverage;
+
+  const MovieDetails({
+    Key? key,
+    required this.id,
+    required this.emailUser,
+    required this.movieTitle,
+    required this.posterPath,
+    required this.voteAverage,
+  }) : super(key: key);
 
   @override
   State<MovieDetails> createState() => _MovieDetailsState();
@@ -18,14 +31,72 @@ class _MovieDetailsState extends State<MovieDetails>
   _MovieDetailsState() {
     movieDetailPresenter = MovieDetailPresenter(this);
   }
-  bool _isfav = false;
-
+  late bool _isfav = false;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   @override
-  onClickFav(bool isfav) {
+  onChangeFav(bool isfav) {
     setState(() {
       _isfav = !_isfav;
     });
     isfav = _isfav;
+  }
+
+  @override
+  fetchFavMovie(isfav) {
+    _isfav = isfav;
+    setState(() {});
+  }
+
+  @override
+  onClickFav() async {
+    if (_isfav == false) {
+      await _firestore.runTransaction((transaction) async {
+        DocumentReference postRef =
+            _firestore.collection('Myfavorite').doc(widget.emailUser);
+        transaction.update(
+          postRef,
+          {
+            "listMovies": FieldValue.arrayUnion([
+              {
+                "movieId": widget.id,
+                "movieName": widget.movieTitle,
+                "posterPath": widget.posterPath,
+                "voteAverage": widget.voteAverage
+              },
+            ])
+          },
+        );
+      });
+      movieDetailPresenter.onClick(!_isfav);
+    } else {
+      await _firestore.runTransaction((transaction) async {
+        DocumentReference postRef =
+            _firestore.collection('Myfavorite').doc(widget.emailUser);
+        transaction.update(
+          postRef,
+          {
+            "listMovies": FieldValue.arrayRemove([
+              {
+                "movieId": widget.id,
+                "movieName": widget.movieTitle,
+                "posterPath": widget.posterPath,
+                "voteAverage": widget.voteAverage
+              },
+            ])
+          },
+        );
+      });
+      movieDetailPresenter.onClick(!_isfav);
+    }
+  }
+
+  @override
+  void initState() {
+    setState(() {
+      movieDetailPresenter.fetchFavMovie(widget.emailUser, widget.id, !_isfav);
+    });
+
+    super.initState();
   }
 
   @override
@@ -179,8 +250,9 @@ class _MovieDetailsState extends State<MovieDetails>
                                 color: Color(0xff022541),
                                 shape: BoxShape.circle),
                             child: IconButton(
-                                onPressed: () =>
-                                    movieDetailPresenter.onClick(!_isfav),
+                                onPressed: () async {
+                                  movieDetailPresenter.onClickFav();
+                                },
                                 icon: Icon(Icons.favorite,
                                     color: _isfav != true
                                         ? Colors.white

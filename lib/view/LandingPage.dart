@@ -4,6 +4,7 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:my_app/view/ListMovies.dart';
 import 'package:my_app/view/LoginPage.dart';
+import 'package:my_app/view/PageScreen.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({Key? key, required this.title}) : super(key: key);
@@ -15,10 +16,11 @@ class LandingPage extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           User? user = snapshot.data;
+          print("User is $user");
           if (user == null) {
             return LoginPage(title: title);
           } else {
-            return ListMovies(title: title, emailUser: user.email);
+            return PageScreen(title: title, emailUser: user.email);
           }
         }
         return const Scaffold(
